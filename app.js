@@ -5,8 +5,8 @@ const taskList = document.getElementById('task-list');
 const tabRoutine = document.getElementById('tab-routine');
 const tabWork = document.getElementById('tab-work');
 
-// 현재 선택된 탭 상태 저장 (기본값: 일상)
-let currentTab = 'routine'; 
+// 현재 선택된 탭 상태 저장 (기본값: 로컬 스토리지에 저장된 탭 또는 'routine')
+let currentTab = localStorage.getItem('lastActiveTab') || 'routine'; 
 
 // 2. 할 일을 추가하고 기기에 영구 저장하는 기능
 addBtn.addEventListener('click', function() {
@@ -54,11 +54,11 @@ function renderTasks() {
     const urgencyIcons = ['⚪ 미지정', '🟢 여유', '🟡 보통', '🔴 긴급'];
     const effortIcons = ['⚪ 미지정', '🍊 가볍게', '🏀 중간', '🌍 묵직하게'];
 
-  filteredTasks.forEach(task => {
+    filteredTasks.forEach(task => {
         const div = document.createElement('div');
         div.className = 'task-item';
 
-        // [추가된 부분] 상단 영역 (텍스트 + 완료 버튼을 묶는 상자)
+        // 상단 영역 (텍스트 + 완료 버튼을 묶는 상자)
         const headerDiv = document.createElement('div');
         headerDiv.className = 'task-header';
 
@@ -67,7 +67,7 @@ function renderTasks() {
         textSpan.style.fontWeight = 'bold';
         textSpan.style.fontSize = '18px';
 
-        // [추가된 부분] 목록 전용 완료 버튼
+        // 목록 전용 완료 버튼
         const completeBtn = document.createElement('button');
         completeBtn.className = 'btn-list-complete';
         completeBtn.innerText = '완료';
@@ -117,9 +117,11 @@ function renderTasks() {
         taskList.appendChild(div);
     });
 }
-// 4. 탭 전환 기능
+
+// 4. 탭 전환 기능 (탭 클릭 시 로컬 스토리지에 상태 저장 추가)
 tabRoutine.addEventListener('click', () => {
     currentTab = 'routine';
+    localStorage.setItem('lastActiveTab', currentTab); // 현재 탭 저장
     tabRoutine.classList.add('active');
     tabWork.classList.remove('active');
     renderTasks();
@@ -127,13 +129,22 @@ tabRoutine.addEventListener('click', () => {
 
 tabWork.addEventListener('click', () => {
     currentTab = 'work';
+    localStorage.setItem('lastActiveTab', currentTab); // 현재 탭 저장
     tabWork.classList.add('active');
     tabRoutine.classList.remove('active');
     renderTasks();
 });
 
-// 앱이 처음 켜질 때 저장된 목록 불러오기
+// 앱이 처음 켜질 때 마지막으로 저장된 탭 활성화 스타일 적용 및 목록 불러오기
+if (currentTab === 'work') {
+    tabWork.classList.add('active');
+    tabRoutine.classList.remove('active');
+} else {
+    tabRoutine.classList.add('active');
+    tabWork.classList.remove('active');
+}
 renderTasks();
+
 
 // --- [오늘의 할 일 팝업 관련 로직] ---
 const popupOverlay = document.getElementById('popup-overlay');
@@ -152,7 +163,7 @@ function showTodayTask() {
     // 1. 현재 탭에 맞고, 속성이 모두 지정된(0이 아닌) 일만 걸러내기
     popupTasksList = tasks.filter(task => task.tab === currentTab && task.urgency > 0 && task.effort > 0);
 
-    // 2. 우선순위 정렬 (기획하신 로직)
+    // 2. 우선순위 정렬
     popupTasksList.sort((a, b) => {
         if (b.urgency !== a.urgency) {
             return b.urgency - a.urgency; // 긴급도 내림차순 (빨강 3 -> 노랑 2 -> 초록 1)
@@ -165,7 +176,6 @@ function showTodayTask() {
         updatePopupUI();
         popupOverlay.classList.remove('hidden'); // 팝업 보이기
     } else {
-        // 처음 테스트 시 매번 알림창이 뜨면 번거로울 수 있어, 알림 대신 조용히 넘어갑니다.
         console.log("오늘 추천해 드릴 할 일이 없습니다.");
     }
 }
@@ -174,6 +184,7 @@ function showTodayTask() {
 function updatePopupUI() {
     if (currentPopupIndex < popupTasksList.length) {
         popupTaskText.innerText = popupTasksList[currentPopupIndex].text;
+        btnNext.style.display = 'inline-block'; // 항목이 남아있으면 다른 일 버튼 보이기
     } else {
         popupTaskText.innerText = "모든 추천 업무를 확인했습니다!";
         btnNext.style.display = 'none'; // 더 볼 일이 없으면 다른 일 버튼 숨기기
@@ -182,7 +193,7 @@ function updatePopupUI() {
 
 // [완료] 버튼: 해당 할 일을 목록에서 완전히 삭제하고 팝업 닫기
 btnComplete.addEventListener('click', () => {
-    if (currentPopupIndex >= popupTasksList.length) return; // 이미 끝났으면 무시
+    if (currentPopupIndex >= popupTasksList.length) return; 
 
     const completedTaskId = popupTasksList[currentPopupIndex].id;
     let tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
@@ -207,6 +218,7 @@ btnNext.addEventListener('click', () => {
 btnLater.addEventListener('click', () => {
     popupOverlay.classList.add('hidden');
 });
+
 
 // --- [튜토리얼 기능 관련 로직] ---
 const tutorialOverlay = document.getElementById('tutorial-overlay');
@@ -307,16 +319,3 @@ setTimeout(() => {
         tutorialOverlay.classList.remove('hidden'); // 처음 온 사람은 튜토리얼 띄우기
     }
 }, 500);
-// 1. 사용자가 탭을 클릭해서 전환할 때 발생하는 함수 내부에 아래 코드를 추가합니다.
-// 'currentTabId'는 클릭한 탭의 ID나 이름(예: 'daily', 'work')입니다.
-localStorage.setItem('lastActiveTab', currentTabId);
-
-// 2. 앱이 처음 실행될 때 (app.js 최상단 또는 초기화 함수 내부) 저장된 탭을 불러옵니다.
-const savedTab = localStorage.getItem('lastActiveTab');
-
-if (savedTab) {
-    // 저장된 탭이 있다면 해당 탭을 화면에 보여주는 함수 실행
-    // 예: showTab(savedTab);
-} else {
-    // 처음 접속해서 저장된 탭이 없다면 기본 탭(예: '일상')을 보여줌
-}
