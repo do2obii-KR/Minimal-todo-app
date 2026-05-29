@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>미니멀 할 일 관리</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="popup-overlay" class="hidden">
+        <div id="popup-box">
+            <h2 style="margin-top: 0; color: #d9534f;">오늘의 할 일</h2>
+            <p id="popup-task-text" style="font-size: 20px; font-weight: bold;">할 일 내용</p>
+            <div class="popup-buttons">
+                <button id="btn-complete">완료</button>
+                <button id="btn-next">다른 일</button>
+                <button id="btn-later">나중에</button>
+            </div>
+        </div>
+    </div>
+
+<div class="tab-container">
+        <button id="tab-routine" class="tab-btn active">일상</button>
+        <button id="tab-work" class="tab-btn">업무</button>
+    </div>
+
+    <div class="input-container">
+        <input type="text" id="task-input" placeholder="새로운 할 일을 입력하세요">
+        <button id="add-btn">입력</button>
+    </div>
+
+    <div id="task-list"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
