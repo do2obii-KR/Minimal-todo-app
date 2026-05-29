@@ -307,3 +307,16 @@ setTimeout(() => {
         tutorialOverlay.classList.remove('hidden'); // 처음 온 사람은 튜토리얼 띄우기
     }
 }, 500);
+// 1. 사용자가 탭을 클릭해서 전환할 때 발생하는 함수 내부에 아래 코드를 추가합니다.
+// 'currentTabId'는 클릭한 탭의 ID나 이름(예: 'daily', 'work')입니다.
+localStorage.setItem('lastActiveTab', currentTabId);
+
+// 2. 앱이 처음 실행될 때 (app.js 최상단 또는 초기화 함수 내부) 저장된 탭을 불러옵니다.
+const savedTab = localStorage.getItem('lastActiveTab');
+
+if (savedTab) {
+    // 저장된 탭이 있다면 해당 탭을 화면에 보여주는 함수 실행
+    // 예: showTab(savedTab);
+} else {
+    // 처음 접속해서 저장된 탭이 없다면 기본 탭(예: '일상')을 보여줌
+}
