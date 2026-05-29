@@ -7,8 +7,21 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="popup-overlay" class="hidden">
-        <div id="popup-box">
+    <div id="tutorial-overlay" class="hidden">
+        <div id="tutorial-box">
+            <div class="step-indicator" id="step-indicator">1 / 5</div>
+            <h2 id="tutorial-title">제목</h2>
+            <div id="tutorial-visual"></div>
+            <p id="tutorial-text">내용</p>
+            <div class="tutorial-buttons">
+                <button id="btn-tutorial-prev">이전</button>
+                <button id="btn-tutorial-next">다음</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="popup-overlay" class="hidden">
+        <div id="popup-box">
             <h2 style="margin-top: 0; color: #d9534f;">오늘의 할 일</h2>
             <p id="popup-task-text" style="font-size: 20px; font-weight: bold;">할 일 내용</p>
             <div class="popup-buttons">
