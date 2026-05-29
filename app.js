@@ -208,7 +208,102 @@ btnLater.addEventListener('click', () => {
     popupOverlay.classList.add('hidden');
 });
 
-// 앱 처음 시작 시 팝업 띄우기 (약 0.5초 뒤에 자연스럽게 등장)
+// --- [튜토리얼 기능 관련 로직] ---
+const tutorialOverlay = document.getElementById('tutorial-overlay');
+const elIndicator = document.getElementById('step-indicator');
+const elTitle = document.getElementById('tutorial-title');
+const elVisual = document.getElementById('tutorial-visual');
+const elText = document.getElementById('tutorial-text');
+const btnTutorialPrev = document.getElementById('btn-tutorial-prev');
+const btnTutorialNext = document.getElementById('btn-tutorial-next');
+
+let currentTutorialStep = 0;
+
+const tutorialSteps = [
+    { title: "", visual: "", text: "필요한 기능만 갖춘 당신의 할 일 도우미" },
+    {
+        title: "일상과 업무 탭 분리",
+        visual: `<div class="mock-tab-container"><div class="mock-tab active">일상</div><div class="mock-tab">업무</div></div>`,
+        text: "상단에서 '일상'과 '업무' 메뉴를 이용할 수 있습니다. 각 탭에 입력된 할 일들은 서로 독립적으로 저장됩니다. 퇴근 후에는 온전히 당신의 일상에 집중하세요."
+    },
+    {
+        title: "단순하고 빠른 기록",
+        visual: `<div class="mock-input-container"><div class="mock-input">주간 보고서 초안 작성...</div><div class="mock-btn">입력</div></div>`,
+        text: "지금 떠오른 할 일을 텍스트로 입력해서 빠르게 목록에 추가하세요. 할 일이 머릿속에 쌓이면 당신의 어깨를 짓누르게 됩니다. 적어두고, 잠시 잊으셔도 좋습니다."
+    },
+    {
+        title: "과업에 순서 부여하기",
+        visual: `<div class="mock-props"><div class="mock-prop-btn" style="background:#f8d7da; border-color:#f5c6cb;">🔴 긴급</div><div class="mock-prop-btn" style="background:#f1f1f1;">🏀 중간</div></div>`,
+        text: "새로 추가된 할 일은 속성이 부여될 때까지 목록의 가장 위에 고정됩니다. 버튼을 눌러, 해당 일이 얼마나 긴급한지, 소요 자원과 시간이 얼마나 필요한 일인지 설정하세요. 두 가지 속성에 맞게 과업의 우선순위가 자동 정렬됩니다."
+    },
+    {
+        title: "하나씩 시작해보기",
+        visual: `<div class="mock-task"><div class="mock-task-title">주간 보고서 초안 작성</div><div class="mock-complete-btn">완료</div></div>`,
+        text: "할 일을 고르기 어려우신가요? 앱을 실행 할 때마다 설정된 우선순위에 따라 가장 중요한 할 일 하나를 팝업으로 추천합니다. 추천된 일부터 시작하셔도 되고, 잠시 미루셔도 좋습니다."
+    }
+];
+
+function updateTutorialUI() {
+    const stepData = tutorialSteps[currentTutorialStep];
+    
+    elIndicator.innerText = `${currentTutorialStep + 1} / ${tutorialSteps.length}`;
+    elText.innerText = stepData.text;
+
+    if (stepData.title === "") {
+        elTitle.style.display = 'none';
+        elVisual.style.display = 'none';
+        elText.classList.add('text-center');
+    } else {
+        elTitle.style.display = 'block';
+        elTitle.innerText = stepData.title;
+        elVisual.style.display = 'flex';
+        elVisual.innerHTML = stepData.visual;
+        elText.classList.remove('text-center');
+    }
+
+    if (currentTutorialStep === 0) {
+        btnTutorialPrev.style.display = 'none';
+    } else {
+        btnTutorialPrev.style.display = 'block';
+    }
+
+    if (currentTutorialStep === tutorialSteps.length - 1) {
+        btnTutorialNext.innerText = "시작하기";
+        btnTutorialNext.style.backgroundColor = "#28a745"; 
+    } else {
+        btnTutorialNext.innerText = "다음";
+        btnTutorialNext.style.backgroundColor = "#343a40"; 
+    }
+}
+
+btnTutorialNext.addEventListener('click', () => {
+    if (currentTutorialStep < tutorialSteps.length - 1) {
+        currentTutorialStep++;
+        updateTutorialUI();
+    } else {
+        // 튜토리얼 완료 처리
+        localStorage.setItem('minimalTodoTutorialDone', 'true');
+        tutorialOverlay.classList.add('hidden');
+        // 튜토리얼이 끝난 후 오늘의 할 일 팝업 띄우기
+        showTodayTask();
+    }
+});
+
+btnTutorialPrev.addEventListener('click', () => {
+    if (currentTutorialStep > 0) {
+        currentTutorialStep--;
+        updateTutorialUI();
+    }
+});
+
+// 앱 처음 시작 시 로컬스토리지 검사
 setTimeout(() => {
-    showTodayTask();
+    const isTutorialDone = localStorage.getItem('minimalTodoTutorialDone');
+    if (isTutorialDone === 'true') {
+        showTodayTask(); // 이미 본 사람은 원래 팝업 띄우기
+    } else {
+        currentTutorialStep = 0;
+        updateTutorialUI();
+        tutorialOverlay.classList.remove('hidden'); // 처음 온 사람은 튜토리얼 띄우기
+    }
 }, 500);
