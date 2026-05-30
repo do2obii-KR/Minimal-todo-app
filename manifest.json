@@ -1,6 +1,6 @@
 {
-  "name": "Minimal-T",
-  "short_name": "Minimal-T",
+  "name": "오늘 할 일",
+  "short_name": "오늘 할 일",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",
