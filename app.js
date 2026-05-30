@@ -47,6 +47,14 @@ function renderTasks() {
 
         if (aUnassigned && !bUnassigned) return -1; 
         if (!aUnassigned && bUnassigned) return 1;  
+        
+        // 둘 다 지정된 경우: 긴급도 내림차순(3->2->1) 후 소요 자원 오름차순(1->2->3)
+        if (!aUnassigned && !bUnassigned) {
+            if (b.urgency !== a.urgency) {
+                return b.urgency - a.urgency;
+            }
+            return a.effort - b.effort;
+        }
         return 0; 
     });
 
@@ -58,7 +66,7 @@ function renderTasks() {
         const div = document.createElement('div');
         div.className = 'task-item';
 
-        // 상단 영역 (텍스트 + 완료 버튼을 묶는 상자)
+        // 상단 영역 (텍스트 + 편집 버튼을 묶는 상자)
         const headerDiv = document.createElement('div');
         headerDiv.className = 'task-header';
 
@@ -67,22 +75,24 @@ function renderTasks() {
         textSpan.style.fontWeight = 'bold';
         textSpan.style.fontSize = '18px';
 
-        // 목록 전용 완료 버튼
-        const completeBtn = document.createElement('button');
-        completeBtn.className = 'btn-list-complete';
-        completeBtn.innerText = '완료';
-        completeBtn.addEventListener('click', () => {
-            // 현재 완료한 할 일을 전체 배열에서 걸러내고 다시 저장
-            tasks = tasks.filter(t => t.id !== task.id);
-            localStorage.setItem('myTasks', JSON.stringify(tasks));
-            renderTasks(); // 지워진 상태로 화면 새로고침
+        // [편집] 버튼 생성 (우측 상단 배치)
+        const editBtn = document.createElement('button');
+        editBtn.className = 'btn-list-edit';
+        editBtn.innerText = '편집';
+        editBtn.addEventListener('click', () => {
+            const newText = prompt('할 일을 수정하세요:', task.text);
+            if (newText !== null && newText.trim() !== '') {
+                task.text = newText.trim();
+                localStorage.setItem('myTasks', JSON.stringify(tasks));
+                renderTasks();
+            }
         });
 
         headerDiv.appendChild(textSpan);
-        headerDiv.appendChild(completeBtn);
+        headerDiv.appendChild(editBtn);
         div.appendChild(headerDiv);
 
-        // 버튼들을 담을 상자
+        // 하단 속성 버튼과 완료 버튼을 담을 상자
         const propsDiv = document.createElement('div');
         propsDiv.className = 'props-container';
 
@@ -96,6 +106,7 @@ function renderTasks() {
             localStorage.setItem('myTasks', JSON.stringify(tasks));
             urgencyBtn.className = `prop-btn urgency-${task.urgency}`;
             urgencyBtn.innerText = urgencyIcons[task.urgency];
+            renderTasks(); // 정렬 순서를 즉시 반영하기 위해 전체 새로고침
         });
 
         // 소요 자원 버튼 생성
@@ -108,20 +119,32 @@ function renderTasks() {
             localStorage.setItem('myTasks', JSON.stringify(tasks));
             effortBtn.className = 'prop-btn';
             effortBtn.innerText = effortIcons[task.effort];
+            renderTasks(); // 정렬 순서를 즉시 반영하기 위해 전체 새로고침
+        });
+
+        // [완료] 버튼 생성 (CSS에 의해 우측 하단 배치됨)
+        const completeBtn = document.createElement('button');
+        completeBtn.className = 'btn-list-complete';
+        completeBtn.innerText = '완료';
+        completeBtn.addEventListener('click', () => {
+            tasks = tasks.filter(t => t.id !== task.id);
+            localStorage.setItem('myTasks', JSON.stringify(tasks));
+            renderTasks(); 
         });
 
         propsDiv.appendChild(urgencyBtn);
         propsDiv.appendChild(effortBtn);
+        propsDiv.appendChild(completeBtn);
         div.appendChild(propsDiv);
 
         taskList.appendChild(div);
     });
 }
 
-// 4. 탭 전환 기능 (탭 클릭 시 로컬 스토리지에 상태 저장 추가)
+// 4. 탭 전환 기능
 tabRoutine.addEventListener('click', () => {
     currentTab = 'routine';
-    localStorage.setItem('lastActiveTab', currentTab); // 현재 탭 저장
+    localStorage.setItem('lastActiveTab', currentTab); 
     tabRoutine.classList.add('active');
     tabWork.classList.remove('active');
     renderTasks();
@@ -129,13 +152,12 @@ tabRoutine.addEventListener('click', () => {
 
 tabWork.addEventListener('click', () => {
     currentTab = 'work';
-    localStorage.setItem('lastActiveTab', currentTab); // 현재 탭 저장
+    localStorage.setItem('lastActiveTab', currentTab); 
     tabWork.classList.add('active');
     tabRoutine.classList.remove('active');
     renderTasks();
 });
 
-// 앱이 처음 켜질 때 마지막으로 저장된 탭 활성화 스타일 적용 및 목록 불러오기
 if (currentTab === 'work') {
     tabWork.classList.add('active');
     tabRoutine.classList.remove('active');
@@ -153,71 +175,84 @@ const btnComplete = document.getElementById('btn-complete');
 const btnNext = document.getElementById('btn-next');
 const btnLater = document.getElementById('btn-later');
 
-let popupTasksList = []; // 팝업에 띄울 후보 목록
-let currentPopupIndex = 0; // 현재 보고 있는 팝업의 순번
+let popupTasksList = []; 
+let currentPopupIndex = 0; 
 
-// 팝업에 띄울 할 일들 정리하고 화면에 보여주기
 function showTodayTask() {
     let tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
     
-    // 1. 현재 탭에 맞고, 속성이 모두 지정된(0이 아닌) 일만 걸러내기
+    // 현재 보고 있는 탭에 맞춰서 추천되도록 필터링 연동
     popupTasksList = tasks.filter(task => task.tab === currentTab && task.urgency > 0 && task.effort > 0);
 
-    // 2. 우선순위 정렬
     popupTasksList.sort((a, b) => {
         if (b.urgency !== a.urgency) {
-            return b.urgency - a.urgency; // 긴급도 내림차순 (빨강 3 -> 노랑 2 -> 초록 1)
+            return b.urgency - a.urgency; 
         }
-        return a.effort - b.effort; // 에너지 오름차순 (오렌지 1 -> 농구공 2 -> 지구 3)
+        return a.effort - b.effort; 
     });
 
     if (popupTasksList.length > 0) {
         currentPopupIndex = 0;
         updatePopupUI();
-        popupOverlay.classList.remove('hidden'); // 팝업 보이기
+        popupOverlay.classList.remove('hidden'); 
     } else {
         console.log("오늘 추천해 드릴 할 일이 없습니다.");
     }
 }
 
-// 팝업 화면 글자 업데이트
 function updatePopupUI() {
     if (currentPopupIndex < popupTasksList.length) {
         popupTaskText.innerText = popupTasksList[currentPopupIndex].text;
-        btnNext.style.display = 'inline-block'; // 항목이 남아있으면 다른 일 버튼 보이기
+        btnNext.style.display = 'inline-block'; 
     } else {
         popupTaskText.innerText = "모든 추천 업무를 확인했습니다!";
-        btnNext.style.display = 'none'; // 더 볼 일이 없으면 다른 일 버튼 숨기기
+        btnNext.style.display = 'none'; 
     }
 }
 
-// [완료] 버튼: 해당 할 일을 목록에서 완전히 삭제하고 팝업 닫기
 btnComplete.addEventListener('click', () => {
     if (currentPopupIndex >= popupTasksList.length) return; 
 
     const completedTaskId = popupTasksList[currentPopupIndex].id;
     let tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
     
-    // 완료된 일 빼고 다시 저장
     tasks = tasks.filter(task => task.id !== completedTaskId);
     localStorage.setItem('myTasks', JSON.stringify(tasks));
     
     alert("수고하셨습니다! 완료 처리되었습니다.");
     
-    renderTasks(); // 뒤에 있는 배경 목록 새로고침
-    popupOverlay.classList.add('hidden'); // 팝업 닫기
+    renderTasks(); 
+    popupOverlay.classList.add('hidden'); 
 });
 
-// [다른 일] 버튼: 다음 우선순위 할 일 보여주기
 btnNext.addEventListener('click', () => {
     currentPopupIndex++;
     updatePopupUI();
 });
 
-// [나중에] 버튼: 팝업 닫기
 btnLater.addEventListener('click', () => {
     popupOverlay.classList.add('hidden');
 });
+
+
+// --- [모바일 스와이프 새로고침 감지 및 추천 연동] ---
+let touchStart = 0;
+window.addEventListener('touchstart', (e) => {
+    if (window.scrollY === 0) {
+        touchStart = e.touches[0].clientY;
+    }
+}, { passive: true });
+
+window.addEventListener('touchend', (e) => {
+    if (window.scrollY === 0 && touchStart > 0) {
+        let touchEnd = e.changedTouches[0].clientY;
+        // 위에서 아래로 손가락을 150픽셀 이상 쓸어내렸을 때 작동
+        if (touchEnd - touchStart > 150) {
+            showTodayTask(); // 현재 선택된 탭 기준 맞춤형 팝업 재등장!
+        }
+        touchStart = 0;
+    }
+}, { passive: true });
 
 
 // --- [튜토리얼 기능 관련 로직] ---
@@ -293,10 +328,8 @@ btnTutorialNext.addEventListener('click', () => {
         currentTutorialStep++;
         updateTutorialUI();
     } else {
-        // 튜토리얼 완료 처리
         localStorage.setItem('minimalTodoTutorialDone', 'true');
         tutorialOverlay.classList.add('hidden');
-        // 튜토리얼이 끝난 후 오늘의 할 일 팝업 띄우기
         showTodayTask();
     }
 });
@@ -308,14 +341,13 @@ btnTutorialPrev.addEventListener('click', () => {
     }
 });
 
-// 앱 처음 시작 시 로컬스토리지 검사
 setTimeout(() => {
     const isTutorialDone = localStorage.getItem('minimalTodoTutorialDone');
     if (isTutorialDone === 'true') {
-        showTodayTask(); // 이미 본 사람은 원래 팝업 띄우기
+        showTodayTask(); 
     } else {
         currentTutorialStep = 0;
         updateTutorialUI();
-        tutorialOverlay.classList.remove('hidden'); // 처음 온 사람은 튜토리얼 띄우기
+        tutorialOverlay.classList.remove('hidden'); 
     }
 }, 500);
