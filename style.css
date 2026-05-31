@@ -104,8 +104,7 @@ body {
 /* ✅ 수정: 버튼을 세로로 배치하고 간격 및 크기 개선 */
 .popup-buttons {
     display: flex;
-    flex-direction: column;
-    gap: 50px;
+    gap: 20px;
     justify-content: center;
     margin-top: 25px;
 }
