@@ -105,7 +105,7 @@ body {
 .popup-buttons {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 25px;
     justify-content: center;
     margin-top: 25px;
 }
