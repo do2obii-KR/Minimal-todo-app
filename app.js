@@ -101,12 +101,12 @@ function renderTasks() {
         urgencyBtn.className = `prop-btn urgency-${task.urgency ?? 0}`;
         urgencyBtn.innerText = urgencyIcons[task.urgency ?? 0];
         
+        // ✅ 수정: renderTasks() 제거 → 정렬은 새로고침 시에만 반영
         urgencyBtn.addEventListener('click', () => {
             task.urgency = ((task.urgency ?? 0) + 1) % 4; 
             localStorage.setItem('myTasks', JSON.stringify(tasks));
             urgencyBtn.className = `prop-btn urgency-${task.urgency}`;
             urgencyBtn.innerText = urgencyIcons[task.urgency];
-            renderTasks(); // 정렬 순서를 즉시 반영하기 위해 전체 새로고침
         });
 
         // 소요 자원 버튼 생성
@@ -114,12 +114,12 @@ function renderTasks() {
         effortBtn.className = 'prop-btn';
         effortBtn.innerText = effortIcons[task.effort ?? 0];
         
+        // ✅ 수정: renderTasks() 제거 → 정렬은 새로고침 시에만 반영
         effortBtn.addEventListener('click', () => {
             task.effort = ((task.effort ?? 0) + 1) % 4; 
             localStorage.setItem('myTasks', JSON.stringify(tasks));
             effortBtn.className = 'prop-btn';
             effortBtn.innerText = effortIcons[task.effort];
-            renderTasks(); // 정렬 순서를 즉시 반영하기 위해 전체 새로고침
         });
 
         // [완료] 버튼 생성 (CSS에 의해 우측 하단 배치됨)
@@ -181,7 +181,6 @@ let currentPopupIndex = 0;
 function showTodayTask() {
     let tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
     
-    // 현재 보고 있는 탭에 맞춰서 추천되도록 필터링 연동
     popupTasksList = tasks.filter(task => task.tab === currentTab && task.urgency > 0 && task.effort > 0);
 
     popupTasksList.sort((a, b) => {
@@ -203,7 +202,7 @@ function showTodayTask() {
 function updatePopupUI() {
     if (currentPopupIndex < popupTasksList.length) {
         popupTaskText.innerText = popupTasksList[currentPopupIndex].text;
-        btnNext.style.display = 'inline-block'; 
+        btnNext.style.display = 'block'; 
     } else {
         popupTaskText.innerText = "모든 추천 업무를 확인했습니다!";
         btnNext.style.display = 'none'; 
@@ -246,9 +245,8 @@ window.addEventListener('touchstart', (e) => {
 window.addEventListener('touchend', (e) => {
     if (window.scrollY === 0 && touchStart > 0) {
         let touchEnd = e.changedTouches[0].clientY;
-        // 위에서 아래로 손가락을 150픽셀 이상 쓸어내렸을 때 작동
         if (touchEnd - touchStart > 150) {
-            showTodayTask(); // 현재 선택된 탭 기준 맞춤형 팝업 재등장!
+            showTodayTask();
         }
         touchStart = 0;
     }
