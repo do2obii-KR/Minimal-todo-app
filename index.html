@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>오늘 할 일</title>
-    <link rel="stylesheet" href="style.css?v=5">
-    <link rel="manifest" href="manifest.json?v=5">
-    <link rel="icon" href="icon.png?v=5">
+    <link rel="stylesheet" href="style.css?v=6">
+    <link rel="manifest" href="manifest.json?v=6">
+    <link rel="icon" href="icon.png?v=6">
 </head>
 <body>
     <div id="tutorial-overlay" class="hidden">
@@ -24,12 +24,14 @@
 
     <div id="popup-overlay" class="hidden">
         <div id="popup-box">
-            <h2 style="margin-top: 0; color: #d9534f;">오늘의 할 일</h2>
+            <!-- ✅ 수정: '오늘의 할 일' → '오늘 할 일' -->
+            <h2 style="margin-top: 0; color: #d9534f;">오늘 할 일</h2>
             <p id="popup-task-text" style="font-size: 20px; font-weight: bold;">할 일 내용</p>
+            <!-- ✅ 수정: 버튼 순서 및 문구 변경 -->
             <div class="popup-buttons">
-                <button id="btn-complete">완료</button>
-                <button id="btn-next">다른 일</button>
+                <button id="btn-next">다음 할 일</button>
                 <button id="btn-later">나중에</button>
+                <button id="btn-complete">완료</button>
             </div>
         </div>
     </div>
@@ -46,6 +48,6 @@
 
     <div id="task-list"></div>
 
-    <script src="app.js?v=5"></script>
+    <script src="app.js?v=6"></script>
 </body>
 </html>
