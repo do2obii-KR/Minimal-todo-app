@@ -75,9 +75,9 @@ body {
 }
 
 /* 긴급도 단계별 배경색 지정 */
-.urgency-1 { background-color: #d4edda; border-color: #c3e6cb; } /* 초록 (여유) */
-.urgency-2 { background-color: #fff3cd; border-color: #ffeeba; } /* 노랑 (보통) */
-.urgency-3 { background-color: #f8d7da; border-color: #f5c6cb; } /* 빨강 (긴급) */
+.urgency-1 { background-color: #d4edda; border-color: #c3e6cb; }
+.urgency-2 { background-color: #fff3cd; border-color: #ffeeba; }
+.urgency-3 { background-color: #f8d7da; border-color: #f5c6cb; }
 
 /* ------------------------------------- */
 /* 여기서부터 팝업창 전용 디자인입니다.  */
@@ -101,13 +101,23 @@ body {
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
+/* ✅ 수정: 버튼을 세로로 배치하고 간격 및 크기 개선 */
 .popup-buttons {
-    display: flex; gap: 10px; justify-content: center; margin-top: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 25px;
 }
 
 .popup-buttons button {
-    padding: 10px 15px; border: none; border-radius: 8px;
-    cursor: pointer; font-weight: bold; color: white;
+    padding: 13px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+    font-size: 15px;
 }
 
 #btn-complete { background-color: #28a745; }
@@ -147,7 +157,7 @@ body {
     font-weight: bold;
     cursor: pointer;
     font-size: 14px;
-    margin-left: auto; /* 왼쪽 마진을 최대로 주어 우측 하단으로 밀어냄 */
+    margin-left: auto;
 }
 
 /* ------------------------------------- */
