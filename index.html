@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>오늘 할 일</title>
-    <link rel="stylesheet" href="style.css?v=6">
-    <link rel="manifest" href="manifest.json?v=6">
-    <link rel="icon" href="icon.png?v=6">
+    <link rel="stylesheet" href="style.css?v=8">
+    <link rel="manifest" href="manifest.json?v=8">
+    <link rel="icon" href="icon.png?v=8">
 </head>
 <body>
     <div id="tutorial-overlay" class="hidden">
@@ -24,10 +24,8 @@
 
     <div id="popup-overlay" class="hidden">
         <div id="popup-box">
-            <!-- ✅ 수정: '오늘의 할 일' → '오늘 할 일' -->
             <h2 style="margin-top: 0; color: #d9534f;">오늘 할 일</h2>
             <p id="popup-task-text" style="font-size: 20px; font-weight: bold;">할 일 내용</p>
-            <!-- ✅ 수정: 버튼 순서 및 문구 변경 -->
             <div class="popup-buttons">
                 <button id="btn-next">다음 할 일</button>
                 <button id="btn-later">나중에</button>
@@ -36,9 +34,11 @@
         </div>
     </div>
 
+    <!-- ✅ 쇼핑 탭 추가 -->
     <div class="tab-container">
-        <button id="tab-routine" class="tab-btn active">일상</button>
-        <button id="tab-work" class="tab-btn">업무</button>
+        <button id="tab-routine"  class="tab-btn active">일상</button>
+        <button id="tab-work"     class="tab-btn">업무</button>
+        <button id="tab-shopping" class="tab-btn">🛒 쇼핑</button>
     </div>
 
     <div class="input-container">
@@ -48,6 +48,6 @@
 
     <div id="task-list"></div>
 
-    <script src="app.js?v=7"></script>
+    <script src="app.js?v=8"></script>
 </body>
 </html>
